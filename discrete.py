@@ -101,11 +101,12 @@ class DiscretePolicy(Policy[Any, Any]):
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action
-        self._Q = np.random.normal((num_observations, num_actions))
+        self._Q = np.random.standard_normal((num_observations, num_actions))
 
     def __call__(self, observation: ObservationType) -> ActionType:
         """Returns the chosen action for the current observable state.
         """
+        #TODO (sean): Choose randomly between max values (if more than one)
         action = np.argmax(self.Q[self.discretize_observation(observation)])
         return self.inverse_discretize_action(action)
 

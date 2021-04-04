@@ -1,4 +1,4 @@
-from RL.base import Environmnet, Memory, Policy
+from base import Environmnet, Memory, Policy
 
 from typing import Collection
 from collections import deque

@@ -127,6 +127,6 @@ class RandomDiscretePolicy(DiscretePolicy):
     def Q(self):
         """Random policy always returns random values for Q.
         """
-        return np.random.rand(self._Q.shape)
+        return np.random.standard_normal(self._Q.shape)
 
 

@@ -1,4 +1,5 @@
 from .base import Environment, Memory, Policy, ObservationType, StateType, ActionType
+from .utils import value_iteration
 
 from typing import Collection, Any, Optional, Callable
 from collections import deque

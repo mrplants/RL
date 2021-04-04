@@ -11,6 +11,7 @@ class DiscreteMemory(Memory[Any, Any]):
     Attributes:
         discretize_observation: Function to discretize an ObservationType
         discretize_action: Function to discretize an ActionType
+        inverse_discretize_action: Function to convert an int to an ActionType
         observations: List of initial observations
         actions: List of actions
         rewards: List of rewards
@@ -21,11 +22,13 @@ class DiscreteMemory(Memory[Any, Any]):
         num_actions: int,
         memory_limit: Optional[int] = None,
         discretize_observation: Callable[[ObservationType], int] = lambda x: x,
-        discretize_action: Callable[[ActionType], int] = lambda x: x):
+        discretize_action: Callable[[ActionType], int] = lambda x: x,
+        inverse_discretize_action: Callable[[int], ActionType] = lambda x: x):
         """Initialize the memory instance variables.
         """
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
+        self.inverse_discretize_action = inverse_discretize_action
         self.num_observations = num_observations
         self.num_actions = num_actions
         self.observations = deque(maxlen=memory_limit)
@@ -51,7 +54,12 @@ class DiscreteMemory(Memory[Any, Any]):
         # terminal state.
         if is_terminal:
             for a in range(self.num_actions):
-                self.remember(next_observation, a, 0, next_observation, False)
+                action = self.inverse_discretize_action(a)
+                self.remember(next_observation,
+                              action,
+                              0,
+                              next_observation,
+                              False)
     
     @property
     def T(self) -> np.ndarray:

@@ -1,4 +1,4 @@
-from .base import Environment, Policy, Memory
+from .base import Environment, Policy, Memory, ObservationType
 from typing import Optional, Callable
 
 def run_episode(

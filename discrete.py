@@ -79,23 +79,6 @@ class DiscreteMemory(Memory[Any, Any]):
             R[self.discretize_observation] += r
         return R / T.sum(axis=1).sum(axis=0)
 
-class RandomDiscretePolicy(Policy[Any, Any]):
-    """RL Policy that chooses randomly from a discrete set of actions
-
-    Attributes:
-        all_actions: List of all actions
-    """
-    def __init__(self, all_actions: Collection[ActionType]):
-        self.all_actions = all_actions
-    
-    def __call__(self, observation: ObservationType) -> ActionType:
-        return random.choice(tuple(self.all_actions))
-    
-    def train(self, memory: Memory) -> None:
-        """Trains the policy.
-        """
-        pass
-
 class DiscretePolicy(Policy[Any, Any]):
     """RL Policy for discretizable observations and actions
 
@@ -103,7 +86,7 @@ class DiscretePolicy(Policy[Any, Any]):
         discretize_observation: Function to discretize an ObservationType
         discretize_action: Function to discretize an ActionType
         inverse_discretize_action: Function to convert an int to an ActionType
-        Q: (np.ndarray, dtype=float, shape=(|O|,|A|)) State-action value
+        _Q: (np.ndarray, dtype=float, shape=(|O|,|A|)) State-action value
             function.  
     """
 
@@ -118,15 +101,32 @@ class DiscretePolicy(Policy[Any, Any]):
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action
-        self.Q = np.random.normal((num_observations, num_actions))
+        self._Q = np.random.normal((num_observations, num_actions))
 
     def __call__(self, observation: ObservationType) -> ActionType:
         """Returns the chosen action for the current observable state.
         """
-        action = np.argmax(Q[self.discretize_observation(observation)])
+        action = np.argmax(self.Q[self.discretize_observation(observation)])
         return self.inverse_discretize_action(action)
+
+    @property
+    def Q(self):
+        """Convenience getter for the state-action value function.
+        """
+        return self._Q
     
     def train(self, memory: Memory) -> None:
         """Trains the policy.
         """
-        _, self.Q = value_iteration(memory.P, memory.R)
+        _, self._Q = value_iteration(memory.P, memory.R)
+
+class RandomDiscretePolicy(DiscretePolicy):
+    """RL Policy that chooses randomly from a discrete set of actions
+    """
+    @property
+    def Q(self):
+        """Random policy always returns random values for Q.
+        """
+        return np.random.normal(self._Q.shape)
+
+

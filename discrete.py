@@ -91,7 +91,7 @@ class DiscreteMemory(Memory[Any, Any]):
         R = np.zeros(self.num_observations)
         T = self.T
         for r, o_prime in zip(self.rewards, self.next_observations):
-            R[self.discretize_observation] += r
+            R[self.discretize_observation(o_prime)] += r
         return R / T.sum(axis=1).sum(axis=0)
 
 class DiscretePolicy(Policy[Any, Any]):

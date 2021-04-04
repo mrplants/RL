@@ -64,7 +64,7 @@ class DiscreteMemory(Memory[Any, Any]):
                 self.remember(self.num_observations-1,
                               action,
                               0,
-                              stle.num_observations-1,
+                              self.num_observations-1,
                               False)
     
     @property

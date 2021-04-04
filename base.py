@@ -50,6 +50,19 @@ class Environment(Generic[StateType, ActionType, ObservationType], abc.ABC):
         """
         pass
 
+class Memory(Generic[ObservationType, ActionType], abc.ABC):
+    """RL Memory abstract base class.
+    """
+
+    @abc.abstractmethod
+    def remember(observation: ObservationType,
+                 action: ActionType,
+                 reward: float,
+                 next_observation: ObservationType) -> None:
+        """Stores the arg Markov tuple.
+        """
+        pass
+        
 class Policy(Generic[ObservationType, ActionType], abc.ABC):
     """RL Policy abstract base class.
     """
@@ -63,18 +76,5 @@ class Policy(Generic[ObservationType, ActionType], abc.ABC):
     @abc.abstractmethod
     def train(self, memory: Memory) -> None:
         """Trains the policy.
-        """
-        pass
-
-class Memory(Generic[ObservationType, ActionType], abc.ABC):
-    """RL Memory abstract base class.
-    """
-
-    @abc.abstractmethod
-    def remember(observation: ObservationType,
-                 action: ActionType,
-                 reward: float,
-                 next_observation: ObservationType) -> None:
-        """Stores the arg Markov tuple.
         """
         pass

@@ -1,4 +1,5 @@
 from .base import Environment, Policy, Memory, ObservationType
+import numpy as np
 from typing import Optional, Callable
 
 def run_episode(

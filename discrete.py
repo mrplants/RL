@@ -26,6 +26,7 @@ class DiscreteMemory(Memory[Any, Any]):
         inverse_discretize_action: Callable[[int], ActionType] = lambda x: x):
         """Initialize the memory instance variables.
         """
+        num_observations += 1 # Add a terminal state
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action
@@ -58,7 +59,12 @@ class DiscreteMemory(Memory[Any, Any]):
                 self.remember(next_observation,
                               action,
                               0,
-                              next_observation,
+                              self.num_observations-1,
+                              False)
+                self.remember(self.num_observations-1,
+                              action,
+                              0,
+                              stle.num_observations-1,
                               False)
     
     @property
@@ -113,6 +119,7 @@ class DiscretePolicy(Policy[Any, Any]):
         inverse_discretize_action: Callable[[int], ActionType] = lambda x: x):
         """Initialize the memory instance variables.
         """
+        num_observations += 1 # Add a terminal state
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action

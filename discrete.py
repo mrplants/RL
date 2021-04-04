@@ -106,8 +106,11 @@ class DiscretePolicy(Policy[Any, Any]):
     def __call__(self, observation: ObservationType) -> ActionType:
         """Returns the chosen action for the current observable state.
         """
-        #TODO (sean): Choose randomly between max values (if more than one)
-        action = np.argmax(self.Q[self.discretize_observation(observation)])
+        # When there is a tie, need to choose randomly among the best actions.
+        action_values = self.Q[self.discretize_observation(observation)]
+        best_actions = np.argwhere(action_values==np.amax(action_values))
+        best_actions = best_actions.flatten()
+        action = np.random.choice(best_actions)
         return self.inverse_discretize_action(action)
 
     @property
@@ -124,10 +127,8 @@ class DiscretePolicy(Policy[Any, Any]):
 class RandomDiscretePolicy(DiscretePolicy):
     """RL Policy that chooses randomly from a discrete set of actions
     """
-    @property
-    def Q(self):
-        """Random policy always returns random values for Q.
+    def __call__(self, *args):
+        """Chooses an action randomly.
         """
-        return np.random.standard_normal(self._Q.shape)
-
-
+        n_actions = self._Q.shape[1]
+        return self.inverse_discretize_action(np.random.randint(n_actions))

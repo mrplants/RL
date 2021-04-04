@@ -33,7 +33,11 @@ def run_episode(
         next_state, reward = environment.step(state, action)
         next_observation = environment.state_to_observation(next_state)
         # Remember the step and perform the callback
-        memory.remember(observation, action, reward, next_observation)
+        memory.remember(observation,
+                        action,
+                        reward,
+                        next_observation,
+                        environment.is_terminal(next_state))
         if step_callback: step_callback(step_number, policy, memory)
         # Setup for next step
         state = next_state

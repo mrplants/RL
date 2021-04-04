@@ -37,7 +37,8 @@ class DiscreteMemory(Memory[Any, Any]):
                  observation: ObservationType,
                  action: ActionType,
                  reward: float,
-                 next_observation: ObservationType) -> None:
+                 next_observation: ObservationType,
+                 is_terminal: bool) -> None:
         """Stores the arg Markov tuple.
         """
         # Store the raw transition (deque maxlen handles popping if len>maxlen)
@@ -45,6 +46,11 @@ class DiscreteMemory(Memory[Any, Any]):
         self.actions.append(action)
         self.rewards.append(reward)
         self.next_observations.append(next_observation)
+        # If the steps ended in a terminal state, remember that.
+        # In a terminal state, a step in any direction would loop back to the
+        # terminal state.
+        for a in range(self.num_actions):
+            self.remember(next_observation, a, 0, next_observation, False)
     
     @property
     def T(self) -> np.ndarray:

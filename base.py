@@ -58,8 +58,14 @@ class Memory(Generic[ObservationType, ActionType], abc.ABC):
     def remember(observation: ObservationType,
                  action: ActionType,
                  reward: float,
-                 next_observation: ObservationType) -> None:
+                 next_observation: ObservationType,
+                 is_terminal:bool) -> None:
         """Stores the arg Markov tuple.
+
+        Args:
+            (o, a, r, o'): the Markov Decision tuple
+            is_terminal: indicates whether or not the step ended in a terminal
+                state.
         """
         pass
         

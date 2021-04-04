@@ -88,7 +88,11 @@ class DiscreteMemory(Memory[Any, Any]):
         """ Convenience getter for transition probabilities.
         """
         T = self.T
-        return T / T.sum(axis=2, keepdims=True)
+        out = np.full(T.shape, 1/self.num_actions)
+        return np.divide(T,
+                         T.sum(axis=2, keepdims=True),
+                         out = out,
+                         where = T.sum(axis=2, keepdims=True) != 0)
     
     @property
     def R(self) -> np.ndarray:
@@ -99,7 +103,11 @@ class DiscreteMemory(Memory[Any, Any]):
         T = self.T
         for r, o_prime in zip(self.rewards, self.next_observations):
             R[self.discretize_observation(o_prime)] += r
-        return R / T.sum(axis=1).sum(axis=0)
+        R = np.divide(R,
+                      T.sum(axis=1).sum(axis=0),
+                      out=R,
+                      where= T.sum(axis=1).sum(axis=0)!=0)
+        return R
 
 class DiscretePolicy(Policy[Any, Any]):
     """RL Policy for discretizable observations and actions

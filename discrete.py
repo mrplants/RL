@@ -129,6 +129,8 @@ class DiscretePolicy(Policy[Any, Any]):
         """Initialize the memory instance variables.
         """
         num_observations += 1 # Add a terminal state
+        self.num_observations = num_observations
+        self.num_actions = num_actions
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action

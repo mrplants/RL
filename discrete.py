@@ -1,6 +1,6 @@
-from base import Environmnet, Memory, Policy
+from base import Environment, Memory, Policy, ObservationType, StateType, ActionType
 
-from typing import Collection
+from typing import Collection, Any, Optional, Callable
 from collections import deque
 import numpy as np
 import random

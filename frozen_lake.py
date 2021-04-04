@@ -93,7 +93,8 @@ class FrozenLake(Environment[str, Action, int]):
         """Indicates whether or not the arg state is terminal.
         """
         index = state.find('S')
-        return self.initial_world_state[index] == 'H'
+        return (self.initial_world_state[index] == 'H' or
+                self.initial_world_state[index] == 'G')
 
     def step(self, state: StateType, action: ActionType) -> (StateType, float):
         """ Takes a single step in the environment.

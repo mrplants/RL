@@ -6,7 +6,10 @@ def run_episode(
     policy: Policy,
     memory: Memory,
     max_steps: Optional[None] = None,
-    step_callback: Optional[Callable[[int, Policy, Memory], None]]=None) -> int:
+    step_callback: Optional[Callable[[ObservationType,
+                                      int,
+                                      Policy,
+                                      Memory], None]]=None) -> int:
     """Runs one episode.
 
     Traverses the environment with the policy, saving the results to memory.
@@ -38,7 +41,10 @@ def run_episode(
                         reward,
                         next_observation,
                         environment.is_terminal(next_state))
-        if step_callback: step_callback(step_number, policy, memory)
+        if step_callback: step_callback(next_observation,
+                                        step_number,
+                                        policy,
+                                        memory)
         # Setup for next step
         state = next_state
         observation = next_observation

@@ -49,8 +49,9 @@ class DiscreteMemory(Memory[Any, Any]):
         # If the steps ended in a terminal state, remember that.
         # In a terminal state, a step in any direction would loop back to the
         # terminal state.
-        for a in range(self.num_actions):
-            self.remember(next_observation, a, 0, next_observation, False)
+        if is_terminal:
+            for a in range(self.num_actions):
+                self.remember(next_observation, a, 0, next_observation, False)
     
     @property
     def T(self) -> np.ndarray:
@@ -120,7 +121,7 @@ class DiscretePolicy(Policy[Any, Any]):
         return self.inverse_discretize_action(action)
 
     @property
-    def Q(self):
+    def Q(self) -> np.ndarray:
         """Convenience getter for the state-action value function.
         """
         return self._Q

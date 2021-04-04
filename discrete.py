@@ -1,4 +1,4 @@
-from base import Environment, Memory, Policy, ObservationType, StateType, ActionType
+from .base import Environment, Memory, Policy, ObservationType, StateType, ActionType
 
 from typing import Collection, Any, Optional, Callable
 from collections import deque

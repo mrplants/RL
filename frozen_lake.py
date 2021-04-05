@@ -81,7 +81,7 @@ class FrozenLake(Environment[str, Action, int]):
     )
 
     def __init__(self, initial_world_state: str,
-                 slip_probs: np.ndarray = no_slip_probs):
+                 slip_probs: np.ndarray = yes_slip_probs):
         self.initial_world_state = initial_world_state
         self.slip_probs = slip_probs
     
@@ -165,13 +165,13 @@ class FrozenLake(Environment[str, Action, int]):
         return len(ALL_ACTIONS)
 
 class FrozenLake4x4(FrozenLake):
-    def __init__(self, slippery: bool = False):
+    def __init__(self, slippery: bool = True):
         super().__init__(
             FrozenLake.lake4x4,
             slip_probs = FrozenLake.yes_slip_probs if slippery else self.no_slip_probs)
 
 class FrozenLake8x8(FrozenLake):
-    def __init__(self, slippery: bool = False):
+    def __init__(self, slippery: bool = True):
         super().__init__(
             FrozenLake.lake8x8,
             slip_probs = FrozenLake.yes_slip_probs if slippery else self.no_slip_probs)

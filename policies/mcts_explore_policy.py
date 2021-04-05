@@ -40,7 +40,9 @@ class MCTSExplorePolicy(DiscretePolicy):
         """Performs exploration rollouts.
         """
         # When there is a tie, need to choose randomly among the best actions.
-        action_values = (self.rollout(observation, memory.T, memory.P) +
+        action_values = (self.rollout(self.discretize_observation(observation),
+                                      memory.T,
+                                      memory.P) +
                          self.Q[self.discretize_observation(observation)])
         best_actions = np.argwhere(action_values==np.amax(action_values))
         best_actions = best_actions.flatten()

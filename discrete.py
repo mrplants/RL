@@ -136,7 +136,9 @@ class DiscretePolicy(Policy[Any, Any]):
         self.inverse_discretize_action = inverse_discretize_action
         self._Q = np.zeros((num_observations, num_actions))
 
-    def __call__(self, observation: ObservationType) -> ActionType:
+    def __call__(self,
+                 observation: ObservationType,
+                 memory: Memory) -> ActionType:
         """Returns the chosen action for the current observable state.
         """
         # When there is a tie, need to choose randomly among the best actions.

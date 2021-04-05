@@ -33,7 +33,7 @@ def run_episode(
     while (not environment.is_terminal(state) and
            (max_steps is None or step_number < max_steps)):
         # Take one step in the episode
-        action = policy(observation)
+        action = policy(observation, memory)
         next_state, reward = environment.step(state, action)
         next_observation = environment.state_to_observation(next_state)
         # Remember the step and perform the callback

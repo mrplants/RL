@@ -74,7 +74,9 @@ class Policy(Generic[ObservationType, ActionType], abc.ABC):
     """
 
     @abc.abstractmethod
-    def __call__(self, observation: ObservationType) -> ActionType:
+    def __call__(self,
+                 observation: ObservationType,
+                 memory: Memory) -> ActionType:
         """Returns the action for the current observable state:
         """
         pass

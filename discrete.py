@@ -37,6 +37,10 @@ class DiscreteMemory(Memory[Any, Any]):
         self.actions = deque(maxlen=memory_limit)
         self.rewards = deque(maxlen=memory_limit)
         self.next_observations = deque(maxlen=memory_limit)
+        self._T = np.zeros((self.num_observations,
+                            self.num_actions,
+                            self.num_observations), dtype=int)
+        self._R_sum = np.zeros(self.num_observations)
 
     def remember(self,
                  observation: ObservationType,
@@ -51,6 +55,11 @@ class DiscreteMemory(Memory[Any, Any]):
         self.actions.append(action)
         self.rewards.append(reward)
         self.next_observations.append(next_observation)
+        # Cache the discretized step
+        self._T[self.discretize_observation(observation),
+                self.discretize_actions(actions),
+                self.discretize_observation(observation)] += 1
+        self._R_sum[self.discretize_observation(next_observation)] += reward
         # If the steps ended in a terminal state, remember that.
         # In a terminal state, a step in any direction would loop back to the
         # terminal state.
@@ -72,16 +81,7 @@ class DiscreteMemory(Memory[Any, Any]):
     def T(self) -> np.ndarray:
         """ Convenience getter for transition_counts.
         """
-        T = np.zeros((self.num_observations,
-                      self.num_actions,
-                      self.num_observations), dtype=int)
-        for o, a, o_prime in zip(self.observations,
-                                 self.actions,
-                                 self.next_observations):
-            T[self.discretize_observation(o),
-              self.discretize_action(a),
-              self.discretize_observation(o_prime)] += 1
-        return T
+        return self._T
     
     @property
     def P(self) -> np.ndarray:
@@ -99,15 +99,10 @@ class DiscreteMemory(Memory[Any, Any]):
         """ Convenience getter for state rewards
         """
         # Use average reward, dependent only on result state
-        R = np.zeros(self.num_observations)
-        T = self.T
-        for r, o_prime in zip(self.rewards, self.next_observations):
-            R[self.discretize_observation(o_prime)] += r
-        R = np.divide(R,
-                      T.sum(axis=1).sum(axis=0),
-                      out=R,
-                      where= T.sum(axis=1).sum(axis=0)!=0)
-        return R
+        return np.divide(self._R_sum,
+                         T.sum(axis=1).sum(axis=0),
+                         out = np.zeros(self.num_observations),
+                         where = T.sum(axis=1).sum(axis=0) != 0)
 
 class DiscretePolicy(Policy[Any, Any]):
     """RL Policy for discretizable observations and actions

@@ -58,7 +58,7 @@ class DiscreteMemory(Memory[Any, Any]):
         # Cache the discretized step
         self._T[self.discretize_observation(observation),
                 self.discretize_action(action),
-                self.discretize_observation(observation)] += 1
+                self.discretize_observation(next_observation)] += 1
         self._R_sum[self.discretize_observation(next_observation)] += reward
         # If the steps ended in a terminal state, remember that.
         # In a terminal state, a step in any direction would loop back to the

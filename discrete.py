@@ -17,6 +17,7 @@ class DiscreteMemory(Memory[Any, Any]):
         actions: List of actions
         rewards: List of rewards
         next_observations: List of subsequent observations
+        transition_terminal: List of transitions that ended in terminal states
     """
     def __init__(self,
         num_observations: int,
@@ -37,6 +38,7 @@ class DiscreteMemory(Memory[Any, Any]):
         self.actions = deque(maxlen=memory_limit)
         self.rewards = deque(maxlen=memory_limit)
         self.next_observations = deque(maxlen=memory_limit)
+        self.transition_terminal = deque(maxlen=memory_limit)
         self._T = np.zeros((self.num_observations,
                             self.num_actions,
                             self.num_observations), dtype=int)
@@ -55,6 +57,7 @@ class DiscreteMemory(Memory[Any, Any]):
         self.actions.append(action)
         self.rewards.append(reward)
         self.next_observations.append(next_observation)
+        self.transition_terminal.append(is_terminal)
         # Cache the discretized step
         self._T[self.discretize_observation(observation),
                 self.discretize_action(action),
@@ -66,16 +69,12 @@ class DiscreteMemory(Memory[Any, Any]):
         if is_terminal:
             for a in range(self.num_actions):
                 action = self.inverse_discretize_action(a)
-                self.remember(next_observation,
-                              action,
-                              0,
-                              self.num_observations-1,
-                              False)
-                self.remember(self.num_observations-1,
-                              action,
-                              0,
-                              self.num_observations-1,
-                              False)
+                self._T[self.discretize_observation(next_observation),
+                        self.discretize_action(action),
+                        self.num_observations-1] += 1
+                self._T[self.num_observations-1,
+                        self.discretize_action(action),
+                        self.num_observations-1] += 1
     
     @property
     def T(self) -> np.ndarray:

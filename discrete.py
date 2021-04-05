@@ -100,9 +100,9 @@ class DiscreteMemory(Memory[Any, Any]):
         """
         # Use average reward, dependent only on result state
         return np.divide(self._R_sum,
-                         T.sum(axis=1).sum(axis=0),
+                         self.T.sum(axis=1).sum(axis=0),
                          out = np.zeros(self.num_observations),
-                         where = T.sum(axis=1).sum(axis=0) != 0)
+                         where = self.T.sum(axis=1).sum(axis=0) != 0)
 
 class DiscretePolicy(Policy[Any, Any]):
     """RL Policy for discretizable observations and actions

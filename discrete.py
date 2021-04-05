@@ -88,7 +88,7 @@ class DiscreteMemory(Memory[Any, Any]):
         """ Convenience getter for transition probabilities.
         """
         T = self.T
-        out = np.full(T.shape, 1/self.num_actions)
+        out = np.full(T.shape, 1/self.num_observations)
         return np.divide(T,
                          T.sum(axis=2, keepdims=True),
                          out = out,

@@ -1,4 +1,4 @@
-from .base import Environment, StateType, ObservationType, ActionType
+from RL.base import Environment, StateType, ObservationType, ActionType
 import numpy as np
 from typing import Tuple
 from enum import Enum

@@ -56,7 +56,7 @@ def run_episode(
 def value_iteration(P: np.ndarray,
                     R: np.ndarray,
                     gamma: float=0.999,
-                    threshold: float=1e-6) -> (np.ndarray, np.ndarray):
+                    threshold: float=1e-5) -> (np.ndarray, np.ndarray):
     """Performs value iteration to calculate and returnthe optimal policy values
 
     P:  The Markov transition probabilities

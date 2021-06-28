@@ -55,8 +55,8 @@ def run_episode(
 
 def value_iteration(P: np.ndarray,
                     R: np.ndarray,
-                    gamma: float=0.9,
-                    threshold: float=0.01) -> (np.ndarray, np.ndarray):
+                    gamma: float=0.99,
+                    threshold: float=1e-6) -> (np.ndarray, np.ndarray):
     """Performs value iteration to calculate and returnthe optimal policy values
 
     P:  The Markov transition probabilities
@@ -69,7 +69,7 @@ def value_iteration(P: np.ndarray,
     """
     V = np.zeros(P.shape[0])
     while True:
-        Q = R[:,np.newaxis] + np.sum(P * (gamma * V)[np.newaxis,np.newaxis], axis=2)
+        Q = np.sum(P * (R + gamma * V)[np.newaxis,np.newaxis], axis=2)
         V_new = np.amax(Q, axis=1)
         if np.amax(np.abs(V_new-V)) < threshold:
             break

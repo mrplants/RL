@@ -71,7 +71,7 @@ def value_iteration(P: np.ndarray,
     """
     V = np.zeros(P.shape[0])
     while True:
-        Q = np.sum(P * (R + gamma * V * K)[np.newaxis,np.newaxis], axis=2)
+        Q = np.sum(P * (R + gamma * V * (1-K))[np.newaxis,np.newaxis], axis=2)
         V_new = np.amax(Q, axis=1)
         if np.amax(np.abs(V_new-V)) < threshold:
             break

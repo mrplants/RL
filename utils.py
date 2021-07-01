@@ -55,12 +55,14 @@ def run_episode(
 
 def value_iteration(P: np.ndarray,
                     R: np.ndarray,
+                    K: np.ndarray,
                     gamma: float=0.999,
                     threshold: float=1e-5) -> (np.ndarray, np.ndarray):
     """Performs value iteration to calculate and returnthe optimal policy values
 
     P:  The Markov transition probabilities
     R:  The expected reward for transitioning into each state
+    K:  The probability that each state is terminal
     gamma:  The discount factor
     threshold:  The iteration termination threshold
 
@@ -69,7 +71,7 @@ def value_iteration(P: np.ndarray,
     """
     V = np.zeros(P.shape[0])
     while True:
-        Q = np.sum(P * (R + gamma * V)[np.newaxis,np.newaxis], axis=2)
+        Q = np.sum(P * (R + gamma * V * K)[np.newaxis,np.newaxis], axis=2)
         V_new = np.amax(Q, axis=1)
         if np.amax(np.abs(V_new-V)) < threshold:
             break

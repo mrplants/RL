@@ -42,7 +42,8 @@ class MCTSExplorePolicy(DiscretePolicy):
         # When there is a tie, need to choose randomly among the best actions.
         action_values = (self.rollout(self.discretize_observation(observation),
                                       memory.T,
-                                      memory.P) +
+                                      memory.P,
+                                      memory.K) +
                          self.Q[self.discretize_observation(observation)])
         best_actions = np.argwhere(action_values==np.amax(action_values))
         best_actions = best_actions.flatten()
@@ -52,13 +53,15 @@ class MCTSExplorePolicy(DiscretePolicy):
     def rollout(self,
                 observation: ObservationType,
                 T: np.ndarray,
-                P: np.ndarray) -> np.ndarray:
+                P: np.ndarray,
+                K: np.ndarray) -> np.ndarray:
         """Performs a Monte Carlo Tree Search rollout with UCT as rewards.
 
         Args:
             observation:  The root observation from which to perform rollouts
             T:  The transition count matrix
             P:  The transition probability matrix
+            K:  The termination probability matrix
         
         Returns:
             Numpy array of exploration values for each action.
@@ -79,6 +82,9 @@ class MCTSExplorePolicy(DiscretePolicy):
                     T_rollout[current_observation, next_action, next_observation] += 1
                     current_observation = next_observation
                     next_action = np.random.randint(self.num_actions)
+                    if np.random.uniform() < K[next_observation]:
+                        # Stop the rollout if it terminates
+                        break
         return action_values / self.search_depth / self.num_rollouts
  
     def get_explore_value(self,

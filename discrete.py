@@ -28,7 +28,6 @@ class DiscreteMemory(Memory[Any, Any]):
         inverse_discretize_action: Callable[[int], ActionType] = lambda x: x):
         """Initialize the memory instance variables.
         """
-        num_observations += 1 # Add a terminal state
         self.discretize_observation = discretize_observation
         self.discretize_action = discretize_action
         self.inverse_discretize_action = inverse_discretize_action
@@ -43,6 +42,7 @@ class DiscreteMemory(Memory[Any, Any]):
                             self.num_actions,
                             self.num_observations), dtype=int)
         self._R_sum = np.zeros(self.num_observations)
+        self._K_sum = np.zeros(self.num_observations) # This tracks how often a state was terminal.
 
     def remember(self,
                  observation: ObservationType,
@@ -66,15 +66,7 @@ class DiscreteMemory(Memory[Any, Any]):
         # If the steps ended in a terminal state, remember that.
         # In a terminal state, a step in any direction would loop back to the
         # terminal state.
-        if is_terminal:
-            for a in range(self.num_actions):
-                action = self.inverse_discretize_action(a)
-                self._T[self.discretize_observation(next_observation),
-                        self.discretize_action(action),
-                        self.num_observations-1] += 1
-                self._T[self.num_observations-1,
-                        self.discretize_action(action),
-                        self.num_observations-1] += 1
+        self._K_sum[self.discretize_observation(next_observation)] += is_terminal
     
     @property
     def T(self) -> np.ndarray:
@@ -92,6 +84,16 @@ class DiscreteMemory(Memory[Any, Any]):
                          T.sum(axis=2, keepdims=True),
                          out = out,
                          where = T.sum(axis=2, keepdims=True) != 0)
+
+    @property
+    def K(self) -> np.ndarray:
+        """ Convenience getter for termination probabilities
+        """
+        # Use average number of times the state was a termination state
+        return np.divide(self._K_sum,
+                         self.T.sum(axis=1).sum(axis=0),
+                         out = np.zeros(self.num_observations),
+                         where = self.T.sum(axis=1).sum(axis=0) != 0)
     
     @property
     def R(self) -> np.ndarray:
@@ -151,7 +153,7 @@ class DiscretePolicy(Policy[Any, Any]):
     def train(self, memory: Memory) -> None:
         """Trains the policy.
         """
-        _, self._Q = value_iteration(memory.P, memory.R)
+        _, self._Q = value_iteration(memory.P, memory.R, memory.K)
 
 class RandomDiscretePolicy(DiscretePolicy):
     """RL Policy that chooses randomly from a discrete set of actions

@@ -149,10 +149,11 @@ class DiscretePolicy(Policy[Any, Any]):
         """
         return self._Q
     
-    def train(self, memory: Memory) -> None:
-        """Trains the policy.
+    def train(self, memory: Memory, gamma:float, threshold: float) -> None:
+        """Trains the policy using value iteration.
         """
-        _, self._Q = value_iteration(memory.P, memory.R, memory.K)
+        _, self._Q = value_iteration(memory.P, memory.R, memory.K,
+                                     gamma=gamma, threshold=threshold)
 
 class RandomDiscretePolicy(DiscretePolicy):
     """RL Policy that chooses randomly from a discrete set of actions

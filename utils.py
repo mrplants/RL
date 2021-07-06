@@ -53,8 +53,7 @@ def run_episode(
         observation = next_observation
         step_number += 1
         rewards += reward
-    return step_number
-
+    return step_number, rewards
 
 def value_iteration(P: np.ndarray,
                     R: np.ndarray,

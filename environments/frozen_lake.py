@@ -3,7 +3,6 @@ import numpy as np
 from typing import Tuple
 from enum import Enum
 
-
 def frozen_lake_4x4_v1_o2s(o: ObservationType) -> StateType:
     """ Observation -> State space transformation for FrozenLake environment.
 
@@ -98,7 +97,102 @@ def frozen_lake_4x4_v2_s2c(s: StateType) -> int:
     centroids = np.stack([rows, columns]).T
     distances = np.linalg.norm(centroids - s[np.newaxis], axis=1)
     return scipy.special.softmax(-distances)
+
+def frozen_lake_8x8_v1_o2s(o: ObservationType) -> StateType:
+    """ Observation -> State space transformation for FrozenLake environment.
+
+    Args:
+        o: Input observation.  This is the (flattened) index of the agent's cell.
+
+    Returns:
+        s: Output state.  This is a one-hot vector over all the possible cells.
+    """
+    s = np.zeros(8*8)
+    s[o] = 1
+    return s
+
+def frozen_lake_8x8_v1_c2s(c: int) -> StateType:
+    """ Centroid index (int) -> State space transformation for FrozenLake env.
+
+    In FrozenLake, each centroid corresponds to one cell.  This means that the
+    centroid index is the same as the observation, but that is irrelevant to
+    this API.
+
+    Args:
+        c: The centroid index
+
+    Returns:
+        s: Output state.  This is a one-hot vector over all possible cells.
+    """
+    s = np.zeros(8*8)
+    s[c] = 1
+    return s
+
+def frozen_lake_8x8_v1_s2c(s: StateType) -> int:
+    """ State space -> centroid distribution transofmration for FrozenLake env.
+
+    Instead of choosing a centroid, this returns a probability distribution over
+    all centroids.  This function uses euclidean distance to each centroid and
+    returns the softmax of the distances over all centroids.
+
+    Args:
+        s: Input state.  This is a vector with an weight for all possbile
+            states.
     
+    Returns:
+        Probability distribution over all centroids.
+    """
+    centroids = np.eye(8*8)
+    distances = np.linalg.norm(centroids - s[np.newaxis], axis=0)
+    return scipy.special.softmax(-distances)
+
+def frozen_lake_8x8_v2_o2s(o: ObservationType) -> StateType:
+    """ Observation -> State space transformation for FrozenLake environment.
+
+    Args:
+        o: Input observation.  This is the (flattened) index of the agent's cell.
+
+    Returns:
+        s: Output state.
+    """
+    return np.array([o // 8, o % 8])
+
+def frozen_lake_8x8_v2_c2s(c: int) -> StateType:
+    """ Centroid index (int) -> State space transformation for FrozenLake env.
+
+    In FrozenLake, each centroid corresponds to one cell.  This means that the
+    centroid index is the same as the observation, but that is irrelevant to
+    this API.
+
+    Args:
+        c: The centroid index
+
+    Returns:
+        s: Output state.
+    """
+    return np.array([c // 8, c % 8])
+
+def frozen_lake_8x8_v2_s2c(s: StateType) -> int:
+    """ State space -> centroid distribution transofmration for FrozenLake env.
+
+    Instead of choosing a centroid, this returns a probability distribution over
+    all centroids.  This function uses euclidean distance to each centroid and
+    returns the softmax of the distances over all centroids.
+
+    Args:
+        s: Input state.  This is a vector with an weight for all possbile
+            states.
+    
+    Returns:
+        Probability distribution over all centroids.
+    """
+    columns, rows = np.meshgrid(np.arange(8), np.arange(8))
+    rows = rows.flatten()
+    columns = columns.flatten()
+    centroids = np.stack([rows, columns]).T
+    distances = np.linalg.norm(centroids - s[np.newaxis], axis=1)
+    return scipy.special.softmax(-distances)
+
 class Action(Enum):
     NORTH = 'NORTH'
     EAST = 'EAST'

@@ -116,11 +116,11 @@ class PredictiveTransitionMemory(Memory[Any, Any]):
             observed transitions.
         discretize_action: Function to discretize an ActionType
         inverse_discretize_action: Function to convert an int to an ActionType
-        recalculate_P: boolean indicating the cache status of P (stale or fresh)
         _R_sum: Sum of the rewards encountered when transitioning to each state.
         _K_sum: Number of times each state was the destination during a terminal
             transition.
         _T: Count of all transitions observed.
+        _P: The cached Markov transition probability matrix.
         reservoir_memory: Bins of recorded transitions associated with all
             (centroid, action) pairs.
         reservoir_memory_count: Count of the stream length for all
@@ -151,13 +151,13 @@ class PredictiveTransitionMemory(Memory[Any, Any]):
         self.inverse_discretize_action = inverse_discretize_action
         self.reservoir_max = reservoir_max
 
-        self.recalculate_P = True # Used to cache P
         # Instance variables for tracking the MDP
         self._R_sum = np.zeros(self.num_state_centroids)
         self._K_sum = np.zeros(self.num_state_centroids)
         self._T = np.zeros((self.num_state_centroids,
                             self.num_actions,
                             self.num_state_centroids))
+        self._P = np.zeros_like(self.T) + 1 / self.num_state_centroids
         all_centroids, all_actions = np.meshgrid(np.arange(self.num_state_centroids),
                                                  np.arange(self.num_actions))
         all_centroids = all_centroids.flatten()
@@ -178,7 +178,6 @@ class PredictiveTransitionMemory(Memory[Any, Any]):
             is_terminal: indicates whether or not the step ended in a terminal
                 state.
         """
-        self.recalculate_P = True
         # Transform transition observations
         c = np.argmax(self.s2c(self.o2s(observation)))
         c_prime = np.argmax(self.s2c(self.o2s(next_observation)))
@@ -203,6 +202,26 @@ class PredictiveTransitionMemory(Memory[Any, Any]):
                                                          action,
                                                          next_observation)
 
+    def train(self):
+        """ Trains the transition model.
+
+        Train the transition model and then calculate the transition
+        probabilities.  Cache the result, since training is expensive.
+        """
+        # Train the transition model using the recorded transitions.
+        all_transitions = [tx for bin in self.reservoir_memory.values() for tx in bin]
+        if not all_transitions:
+            return np.zeros_like(self.T) + 1 / self.num_state_centroids
+        s, a, s_prime = zip(*[(self.o2s(o),
+                            self.discretize_action(a),
+                            self.o2s(o_prime)) for o, a, o_prime in all_transitions])
+        self.T_model.initialize()
+        self.T_model.train(list(zip(s, a)), s_prime)
+        # Create a transition table using the transition model
+        self._P = np.zeros_like(self.T)
+        all_c, all_a = zip(*self.reservoir_memory.keys())
+        self._P[all_c, all_a] = [self.s2c(s_prime) for s_prime in [self.T_model(self.c2s(c), a) for c, a in zip(all_c, all_a)]]
+
     @property
     def T(self) -> np.ndarray:
         """ Convenience getter for transition_counts.
@@ -216,20 +235,6 @@ class PredictiveTransitionMemory(Memory[Any, Any]):
         Train the transition model and then calculate the transition
         probabilities.  Cache the result, since training is expensive.
         """
-        if self.recalculate_P:
-            # Train the transition model using the recorded transitions.
-            all_transitions = [tx for bin in self.reservoir_memory.values() for tx in bin]
-            if not all_transitions:
-                return np.zeros_like(self.T) + 1 / self.num_state_centroids
-            s, a, s_prime = zip(*[(self.o2s(o),
-                                self.discretize_action(a),
-                                self.o2s(o_prime)) for o, a, o_prime in all_transitions])
-            self.T_model.initialize()
-            self.T_model.train(list(zip(s, a)), s_prime)
-            # Create a transition table using the transition model
-            self._P = np.zeros_like(self.T)
-            all_c, all_a = zip(*self.reservoir_memory.keys())
-            self._P[all_c, all_a] = [self.s2c(s_prime) for s_prime in [self.T_model(self.c2s(c), a) for c, a in zip(all_c, all_a)]]
         return self._P
 
     @property

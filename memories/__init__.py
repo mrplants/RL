@@ -1,1 +1,2 @@
 from RL.memories.predictive_transition_memory import PredictiveTransitionMemory, LeastSquaresTransitionModel
+from RL.discrete import DiscreteMemory

@@ -10,7 +10,7 @@ def run_episode(
     step_callback: Optional[Callable[[ObservationType,
                                       int,
                                       Policy,
-                                      Memory], None]]=None) -> int:
+                                      Memory], None]]=None) -> (int, float):
     """Runs one episode.
 
     Traverses the environment with the policy, saving the results to memory.
@@ -25,11 +25,13 @@ def run_episode(
             progress along the episode. 
     
     Returns:
-        The number of steps taken in the episode.
+        steps: The number of steps taken in the episode.
+        rewards: The total rewards earned in the episode.
     """
     state = environment.initial_state
     observation = environment.state_to_observation(state)
     step_number = 0
+    rewards = 0
     while (not environment.is_terminal(state) and
            (max_steps is None or step_number < max_steps)):
         # Take one step in the episode
@@ -50,8 +52,8 @@ def run_episode(
         state = next_state
         observation = next_observation
         step_number += 1
-    return step_number
-
+        rewards += reward
+    return step_number, rewards
 
 def value_iteration(P: np.ndarray,
                     R: np.ndarray,

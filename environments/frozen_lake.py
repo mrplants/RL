@@ -2,6 +2,7 @@ from RL.base import Environment, StateType, ObservationType, ActionType
 import numpy as np
 from typing import Tuple
 from enum import Enum
+import scipy.special
 
 def frozen_lake_4x4_v1_o2s(o: ObservationType) -> StateType:
     """ Observation -> State space transformation for FrozenLake environment.
